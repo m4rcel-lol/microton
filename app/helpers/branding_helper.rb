@@ -15,7 +15,15 @@ module BrandingHelper
   def _logo_as_symbol_wordmark
     tag.svg(viewBox: '0 0 261 66', class: 'logo logo--wordmark') do
       tag.title(site_title) +
-        tag.use(href: '#logo-symbol-wordmark')
+        tag.text(
+          'Microton',
+          x: 0,
+          y: 50,
+          fill: 'currentColor',
+          'font-family': 'Inter, system-ui, sans-serif',
+          'font-size': 50,
+          'font-weight': 700
+        )
     end
   end
 

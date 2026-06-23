@@ -78,7 +78,7 @@ export const LinkFooter: React.FC<{
         </ul>
       </section>
       <section>
-        <h2 className={classes.heading}>Mastodon:</h2>
+        <h2 className={classes.heading}>Based on Mastodon:</h2>
         <ul className={classes.list}>
           <li>
             <a href='https://joinmastodon.org' target='_blank' rel='noopener'>
