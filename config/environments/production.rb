@@ -93,9 +93,20 @@ Rails.application.configure do
   config.action_mailer.default_options[:reply_to]    = config.x.email.reply_to if config.x.email.reply_to.present?
   config.action_mailer.default_options[:return_path] = config.x.email.return_path if config.x.email.return_path.present?
 
-  config.action_mailer.smtp_settings = Mastodon::EmailConfigurationHelper.convert_smtp_settings(config.x.email.smtp_settings)
+  email_delivery_method = config.x.email.delivery_method.to_sym
+  email_delivery_enabled = ActiveModel::Type::Boolean.new.cast(
+    ENV.fetch('SMTP_ENABLED') do
+      email_delivery_method == :smtp ? config.x.email.smtp_settings[:address].present?.to_s : 'true'
+    end
+  )
 
-  config.action_mailer.delivery_method = config.x.email.delivery_method.to_sym
+  if email_delivery_enabled
+    config.action_mailer.smtp_settings = Mastodon::EmailConfigurationHelper.convert_smtp_settings(config.x.email.smtp_settings) if email_delivery_method == :smtp
+    config.action_mailer.delivery_method = email_delivery_method
+  else
+    config.action_mailer.perform_deliveries = false
+    config.action_mailer.delivery_method = :test
+  end
 
   config.action_dispatch.default_headers = {
     'Server' => ENV.fetch('SERVER_SOFTWARE_NAME', 'Microton'),

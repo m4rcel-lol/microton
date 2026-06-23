@@ -17,7 +17,10 @@ Edit `.env` before starting anything:
 - Fill `DB_PASS`, `SECRET_KEY_BASE`, all three
   `ACTIVE_RECORD_ENCRYPTION_*` values, `VAPID_PRIVATE_KEY`, and
   `VAPID_PUBLIC_KEY`.
-- Set SMTP values to a real mail provider before accepting users.
+- Set `SMTP_ENABLED=true` and SMTP values to a real mail provider before
+  accepting users who need confirmation, password reset, or notification e-mail.
+  Leave `SMTP_ENABLED=false` for a private instance that intentionally does not
+  send e-mail.
 
 Useful local secret commands:
 
@@ -51,6 +54,19 @@ docker compose ps
 By default, web is exposed on `127.0.0.1:40122` and streaming on
 `127.0.0.1:13368`. Put a reverse proxy in front of those ports and terminate TLS
 there.
+
+Example Caddyfile:
+
+```caddy
+mt.index.sarl {
+  reverse_proxy /api/v1/streaming* 127.0.0.1:13368
+  reverse_proxy 127.0.0.1:40122
+}
+```
+
+Do not bind the site block as `mt.index.sarl:80` unless another proxy is already
+terminating TLS before Caddy. In production Rails forces HTTPS, so an HTTP-only
+Caddy site will redirect browsers to HTTPS without serving the HTTPS endpoint.
 
 ## 4. Create the first owner account
 
