@@ -1,11 +1,11 @@
 ---
 en:
   about:
-    about_mastodon_html: 'The social network of the future: No ads, no corporate surveillance, ethical design, and decentralization! Own your data with Mastodon!'
+    about_mastodon_html: 'Microton is a lightweight, decentralized social network server: no ads, no corporate surveillance, ethical design, and control over your own data.'
     contact_missing: Not set
     contact_unavailable: N/A
     default_thumbnail_description: Two smiling cartoon mastodons (who look like elephants) toss a paper plane between them. They're surrounded by a bright blue sky and floating planets with trees and more mastodons on them.
-    hosted_on: Mastodon hosted on %{domain}
+    hosted_on: Microton hosted on %{domain}
     title: About
   accounts:
     errors:
@@ -1573,7 +1573,7 @@ en:
       content: We're sorry, but something went wrong on our end.
       title: This page is not correct
     '503': The page could not be served due to a temporary server failure.
-    noscript_html: To use the Mastodon web application, please enable JavaScript. Alternatively, try one of the <a href="%{apps_path}">native apps</a> for Mastodon for your platform.
+    noscript_html: To use the Microton web application, please enable JavaScript. Alternatively, try one of the <a href="%{apps_path}">Mastodon-compatible native apps</a> for your platform.
   existing_username_validator:
     not_found: could not find a local user with that username
     not_found_multiple: could not find %{usernames}
@@ -1856,7 +1856,7 @@ en:
     collection_update:
       title_html: "%{name} updated a collection you are in"
     generic:
-      sign_in: Sign in to the Mastodon web app
+      sign_in: Sign in to the Microton web app
       summary_html: You're on an app that does not support the most recent version of Mastodon. %{link} for full functionality.
     moderation_warning:
       summary_html: You're on an app that does not support the most recent version of Mastodon. %{link}.
@@ -2066,7 +2066,7 @@ en:
     aliases: Account aliases
     appearance: Appearance
     authorized_apps: Authorized apps
-    back: Back to Mastodon
+    back: Back to Microton
     delete: Account deletion
     development: Development
     edit_profile: Edit profile
@@ -2194,7 +2194,7 @@ en:
     review_link: Review terms of service
     title: The terms of service of %{domain} are changing
   themes:
-    default: Mastodon
+    default: Microton
   time:
     formats:
       default: "%b %d, %Y, %H:%M"

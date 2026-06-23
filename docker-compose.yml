@@ -1,141 +1,173 @@
-# This file is designed for production server deployment, not local development work
-# For a containerized local dev environment, see: https://github.com/mastodon/mastodon/blob/main/docs/DEVELOPMENT.md#docker
+# Production-oriented Docker Compose stack for Microton.
+# Copy .env.example to .env, fill every required secret, then run:
+#   docker compose build
+#   docker compose --profile setup run --rm setup
+#   docker compose up -d
+
+name: ${COMPOSE_PROJECT_NAME:-microton}
+
+x-microton-app: &microton-app
+  image: ${MICROTON_IMAGE:-microton-web:latest}
+  build:
+    context: .
+    dockerfile: Dockerfile
+    target: mastodon
+    args:
+      MASTODON_VERSION_METADATA: ${MICROTON_VERSION_METADATA:-microton}
+      RAILS_SERVE_STATIC_FILES: ${RAILS_SERVE_STATIC_FILES:-true}
+      RUBY_YJIT_ENABLE: ${RUBY_YJIT_ENABLE:-1}
+  env_file:
+    - ${MICROTON_ENV_FILE:-.env}
+  environment:
+    BIND: 0.0.0.0
+    NODE_ENV: production
+    RAILS_ENV: production
+    WEB_AUTHN_RP_NAME: ${WEB_AUTHN_RP_NAME:-Microton}
+    WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}
+    MAX_THREADS: ${MAX_THREADS:-5}
+    SIDEKIQ_CONCURRENCY: ${SIDEKIQ_CONCURRENCY:-3}
+  networks:
+    - external_network
+    - internal_network
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  volumes:
+    - public-system:/mastodon/public/system
 
 services:
   db:
-    restart: always
-    image: postgres:14-alpine
-    shm_size: 256mb
+    restart: unless-stopped
+    image: postgres:${POSTGRES_VERSION:-14-alpine}
+    shm_size: ${POSTGRES_SHM_SIZE:-256mb}
     networks:
       - internal_network
     healthcheck:
-      test: ['CMD', 'pg_isready', '-U', 'postgres']
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
-      - ./postgres14:/var/lib/postgresql/data
+      - postgres14:/var/lib/postgresql/data
     environment:
-      - 'POSTGRES_HOST_AUTH_METHOD=trust'
+      POSTGRES_DB: ${DB_NAME:-mastodon_production}
+      POSTGRES_USER: ${DB_USER:-mastodon}
+      POSTGRES_PASSWORD: ${DB_PASS}
 
   redis:
-    restart: always
-    image: redis:7-alpine
+    restart: unless-stopped
+    image: redis:${REDIS_VERSION:-7-alpine}
     networks:
       - internal_network
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
-      - ./redis:/data
-
-  # es:
-  #   restart: always
-  #   image: docker.elastic.co/elasticsearch/elasticsearch:8.19.15
-  #   environment:
-  #     - "ELASTIC_PASSWORD=password"  #Username is elastic. Do not change the username.
-  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m -Des.enforce.bootstrap.checks=true"
-  #     - "xpack.license.self_generated.type=basic"
-  #     - "xpack.security.enabled=false"
-  #     - "xpack.watcher.enabled=false"
-  #     - "xpack.graph.enabled=false"
-  #     - "xpack.ml.enabled=false"
-  #     - "bootstrap.memory_lock=true"
-  #     - "cluster.name=es-mastodon"
-  #     - "discovery.type=single-node"
-  #     - "thread_pool.write.queue_size=1000"
-  #   networks:
-  #      - external_network
-  #      - internal_network
-  #   healthcheck:
-  #      test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
-  #   volumes:
-  #      - ./elasticsearch:/usr/share/elasticsearch/data
-  #   ulimits:
-  #     memlock:
-  #       soft: -1
-  #       hard: -1
-  #     nofile:
-  #       soft: 65536
-  #       hard: 65536
-  #   ports:
-  #     - '127.0.0.1:9200:9200'
+      - redis:/data
 
   web:
-    # You can uncomment the following line if you want to not use the prebuilt image, for example if you have local code changes
-    # build: .
-    image: ghcr.io/mastodon/mastodon:v4.6.0
-    restart: always
-    env_file: .env.production
+    <<: *microton-app
+    restart: unless-stopped
     command: bundle exec puma -C config/puma.rb
-    networks:
-      - external_network
-      - internal_network
     healthcheck:
-      # prettier-ignore
-      test: ['CMD-SHELL',"curl -s --noproxy localhost localhost:3000/health | grep -q 'OK' || exit 1"]
+      test: ['CMD-SHELL', "curl -fsS --noproxy localhost localhost:3000/health | grep -q 'OK'"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
     ports:
-      - '127.0.0.1:3000:3000'
-    depends_on:
-      - db
-      - redis
-      # - es
-    volumes:
-      - ./public/system:/mastodon/public/system
+      - '${WEB_BIND:-127.0.0.1}:${WEB_PORT:-3000}:3000'
 
   streaming:
-    # You can uncomment the following lines if you want to not use the prebuilt image, for example if you have local code changes
-    # build:
-    #   dockerfile: ./streaming/Dockerfile
-    #   context: .
-    image: ghcr.io/mastodon/mastodon-streaming:v4.6.0
-    restart: always
-    env_file: .env.production
+    image: ${MICROTON_STREAMING_IMAGE:-microton-streaming:latest}
+    build:
+      context: .
+      dockerfile: ./streaming/Dockerfile
+      args:
+        MASTODON_VERSION_METADATA: ${MICROTON_VERSION_METADATA:-microton}
+    restart: unless-stopped
+    env_file:
+      - ${MICROTON_ENV_FILE:-.env}
+    environment:
+      BIND: 0.0.0.0
+      NODE_ENV: production
+      PORT: 4000
     command: node ./streaming/index.js
     networks:
       - external_network
       - internal_network
-    healthcheck:
-      # prettier-ignore
-      test: ['CMD-SHELL', "curl -s --noproxy localhost localhost:4000/api/v1/streaming/health | grep -q 'OK' || exit 1"]
-    ports:
-      - '127.0.0.1:4000:4000'
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', "curl -fsS --noproxy localhost localhost:4000/api/v1/streaming/health | grep -q 'OK'"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    ports:
+      - '${STREAMING_BIND:-127.0.0.1}:${STREAMING_PORT:-4000}:4000'
 
   sidekiq:
-    # You can uncomment the following line if you want to not use the prebuilt image, for example if you have local code changes
-    # build: .
-    image: ghcr.io/mastodon/mastodon:v4.6.0
-    restart: always
-    env_file: .env.production
-    command: bundle exec sidekiq
-    depends_on:
-      - db
-      - redis
+    <<: *microton-app
+    restart: unless-stopped
+    command: bundle exec sidekiq -c ${SIDEKIQ_CONCURRENCY:-3}
+    healthcheck:
+      test: ['CMD-SHELL', 'test -f /mastodon/tmp/${MASTODON_SIDEKIQ_READY_FILENAME:-sidekiq_process_has_started_and_will_begin_processing_jobs}']
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  setup:
+    <<: *microton-app
+    profiles: ['setup']
+    restart: 'no'
+    command: bundle exec rails db:prepare
+
+  es:
+    profiles: ['search']
+    restart: unless-stopped
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTICSEARCH_VERSION:-8.19.15}
+    environment:
+      ES_JAVA_OPTS: ${ES_JAVA_OPTS:--Xms512m -Xmx512m -Des.enforce.bootstrap.checks=true}
+      xpack.license.self_generated.type: basic
+      xpack.security.enabled: 'false'
+      xpack.watcher.enabled: 'false'
+      xpack.graph.enabled: 'false'
+      xpack.ml.enabled: 'false'
+      bootstrap.memory_lock: 'true'
+      cluster.name: es-microton
+      discovery.type: single-node
+      thread_pool.write.queue_size: 1000
     networks:
       - external_network
       - internal_network
-    volumes:
-      - ./public/system:/mastodon/public/system
     healthcheck:
-      test: ['CMD-SHELL', "ps aux | grep '[s]idekiq\ 8' || false"]
-
-  ## Uncomment to enable federation with tor instances along with adding the following ENV variables
-  ## http_hidden_proxy=http://privoxy:8118
-  ## ALLOW_ACCESS_TO_HIDDEN_SERVICE=true
-  # tor:
-  #   image: sirboops/tor
-  #   networks:
-  #      - external_network
-  #      - internal_network
-  #
-  # privoxy:
-  #   image: sirboops/privoxy
-  #   volumes:
-  #     - ./priv-config:/opt/config
-  #   networks:
-  #     - external_network
-  #     - internal_network
+      test: ['CMD-SHELL', 'curl --silent --fail localhost:9200/_cluster/health || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
 
 networks:
   external_network:
   internal_network:
     internal: true
+
+volumes:
+  postgres14:
+  redis:
+  public-system:
+  elasticsearch:

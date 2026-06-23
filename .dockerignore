@@ -5,7 +5,15 @@
 .gitattributes
 .gitignore
 .github
+.devcontainer
+.storybook
 .vscode
+coverage
+dist
+docs
+spec
+stats.html
+tmp
 public/system
 public/assets
 public/packs

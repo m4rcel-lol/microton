@@ -1,10 +1,15 @@
+# Microton
+
+Microton is a lightweight Mastodon-based social server focused on a small,
+Docker Compose-friendly deployment footprint while keeping the familiar web
+interface intact.
+
 > [!NOTE]
-> Want to learn more about Mastodon?
-> Click below to find out more in a video.
+> Microton remains ActivityPub-compatible and is based on Mastodon.
 
 <p align="center">
   <a style="text-decoration:none" href="https://www.youtube.com/watch?v=IPSbNdBmWKE">
-    <img alt="Mastodon hero image" src="./docs/hero-nodes.gif" />
+    <img alt="Microton hero image" src="./docs/hero-nodes.gif" />
   </a>
 </p>
 
@@ -17,7 +22,7 @@
     <img src="https://d322cqt584bo4o.cloudfront.net/mastodon/localized.svg" alt="Crowdin" /></a>
 </p>
 
-Mastodon is a **free, open-source social network server** based on [ActivityPub](https://www.w3.org/TR/activitypub/) where users can follow friends and discover new ones. On Mastodon, users can publish anything they want: links, pictures, text, and video. All Mastodon servers are interoperable as a federated network (users on one server can seamlessly communicate with users from another one, including non-Mastodon software that implements ActivityPub!)
+Microton is a **free, open-source social network server** based on [ActivityPub](https://www.w3.org/TR/activitypub/) where users can follow friends and discover new ones. It keeps Mastodon's compatibility model while defaulting to a smaller Docker Compose deployment.
 
 ## Navigation
 
@@ -26,7 +31,7 @@ Mastodon is a **free, open-source social network server** based on [ActivityPub]
   - [View sponsors](https://joinmastodon.org/sponsors)
 - [Blog 📰](https://blog.joinmastodon.org)
 - [Documentation 📚](https://docs.joinmastodon.org)
-- [Official container image 🚢](https://github.com/mastodon/mastodon/pkgs/container/mastodon)
+- [Docker Compose deployment](docs/DOCKER_COMPOSE.md)
 
 ## Features
 

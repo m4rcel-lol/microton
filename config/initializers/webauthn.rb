@@ -6,7 +6,7 @@ WebAuthn.configure do |config|
   config.allowed_origins = ["#{Rails.configuration.x.use_https ? 'https' : 'http'}://#{Rails.configuration.x.web_domain}"]
 
   # Relying Party name for display purposes
-  config.rp_name = 'Mastodon'
+  config.rp_name = ENV.fetch('WEB_AUTHN_RP_NAME', 'Microton')
 
   # Optionally configure a client timeout hint, in milliseconds.
   # This hint specifies how long the browser should wait for an
