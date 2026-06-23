@@ -48,8 +48,8 @@ docker compose up -d
 docker compose ps
 ```
 
-By default, web is exposed on `127.0.0.1:3000` and streaming on
-`127.0.0.1:4000`. Put a reverse proxy in front of those ports and terminate TLS
+By default, web is exposed on `127.0.0.1:40122` and streaming on
+`127.0.0.1:13368`. Put a reverse proxy in front of those ports and terminate TLS
 there.
 
 ## 4. Create the first owner account
