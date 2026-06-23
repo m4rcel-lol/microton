@@ -16,12 +16,16 @@ export const DisplayNameVerifiedBadge: FC = () => {
   const label = intl.formatMessage(verifiedBadgeMessage);
 
   return (
-    <span className='display-name__verified-badge' title={label}>
+    <span
+      className='display-name__verified-badge'
+      role='img'
+      aria-label={label}
+      title={label}
+    >
       <Icon
         id='verified'
         icon={IconVerified}
         noFill
-        aria-label={label}
       />
     </span>
   );
