@@ -46,7 +46,6 @@ const severityMessages = {
 
 const mapStateToProps = state => ({
   server: state.server.server,
-  locale: state.getIn(['meta', 'locale']),
   extendedDescription: state.server.extendedDescription,
   domainBlocks: state.server.domainBlocks,
 });
@@ -55,7 +54,6 @@ class About extends PureComponent {
 
   static propTypes = {
     server: ImmutablePropTypes.map,
-    locale: ImmutablePropTypes.string,
     extendedDescription: ImmutablePropTypes.map,
     domainBlocks: ImmutablePropTypes.contains({
       isLoading: PropTypes.bool,
@@ -79,8 +77,12 @@ class About extends PureComponent {
   };
 
   render () {
-    const { multiColumn, intl, server, extendedDescription, domainBlocks, locale } = this.props;
+    const { multiColumn, intl, server, extendedDescription, domainBlocks } = this.props;
     const isLoading = server.isLoading;
+    const contactAccountId = server.item?.contact?.account?.id;
+    const shortDescription = server.item?.description;
+    const hasExtendedDescription = (extendedDescription.item?.content ?? '').length > 0;
+    const hasShortDescription = (shortDescription ?? '').trim().length > 0;
 
     return (
       <Column bindToDocument={!multiColumn} label={intl.formatMessage(messages.title)}>
@@ -104,7 +106,7 @@ class About extends PureComponent {
             <div className='about__meta__column'>
               <h4><FormattedMessage id='server_banner.administered_by' defaultMessage='Administered by:' /></h4>
 
-              <Account id={server.item?.contact?.account?.id} size={36} minimal />
+              {isLoading ? <Skeleton width='10ch' /> : contactAccountId && <Account id={contactAccountId} size={36} minimal />}
             </div>
 
             <hr className='about__meta__divider' />
@@ -127,11 +129,15 @@ class About extends PureComponent {
                 <br />
                 <Skeleton width='70%' />
               </>
-            ) : (extendedDescription.item?.content?.length > 0 ? (
+            ) : (hasExtendedDescription ? (
               <div
                 className='prose'
                 dangerouslySetInnerHTML={{ __html: extendedDescription.item?.content }}
               />
+            ) : hasShortDescription ? (
+              <div className='prose'>
+                <p>{shortDescription}</p>
+              </div>
             ) : (
               <p><FormattedMessage id='about.not_available' defaultMessage='This information has not been made available on this server.' /></p>
             ))}

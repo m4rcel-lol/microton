@@ -57,6 +57,12 @@ class AccountPolicy < ApplicationPolicy
     role.can?(:delete_user_data) && role.overrides?(record.user_role) && !record.instance_actor?
   end
 
+  def verify_badge?
+    role.can?(:manage_users) && role.overrides?(record.user_role) && !record.instance_actor?
+  end
+
+  alias unverify_badge? verify_badge?
+
   def unblock_email?
     role.can?(:manage_users)
   end

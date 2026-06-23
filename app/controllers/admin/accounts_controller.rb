@@ -48,6 +48,20 @@ module Admin
       redirect_to admin_account_path(@account.id), notice: I18n.t('admin.accounts.memorialized_msg', username: @account.acct)
     end
 
+    def verify_badge
+      authorize @account, :verify_badge?
+      @account.update!(manual_verified_badge: true)
+      log_action :verify_badge, @account
+      redirect_to admin_account_path(@account.id), notice: I18n.t('admin.accounts.verified_badge_msg', username: @account.acct)
+    end
+
+    def unverify_badge
+      authorize @account, :unverify_badge?
+      @account.update!(manual_verified_badge: false)
+      log_action :unverify_badge, @account
+      redirect_to admin_account_path(@account.id), notice: I18n.t('admin.accounts.unverified_badge_msg', username: @account.acct)
+    end
+
     def enable
       authorize @account.user, :enable?
       @account.user.enable!

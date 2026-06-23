@@ -18,6 +18,22 @@
   %td
     = table_link_to 'contact_mail', t('admin.accounts.change_role.label'), admin_user_role_path(account.user) if can?(:change_role, account.user)
 %tr
+  %th= t('admin.accounts.verified_badge')
+  %td
+    - if account.verified_badge?
+      = t('admin.accounts.verified_badge_visible')
+    - else
+      = t('admin.accounts.verified_badge_not_visible')
+    - if account.manual_verified_badge?
+      %span.positive-hint= t('admin.accounts.verified_badge_manual')
+    - elsif account.verified_badge?
+      %span.muted-hint= t('admin.accounts.verified_badge_automatic')
+  %td
+    - if account.manual_verified_badge?
+      = table_link_to 'remove_done', t('admin.accounts.unverify_badge'), unverify_badge_admin_account_path(account.id), method: :post if can?(:unverify_badge, account)
+    - else
+      = table_link_to 'verified', t('admin.accounts.verify_badge'), verify_badge_admin_account_path(account.id), method: :post if can?(:verify_badge, account)
+%tr
   %th{ rowspan: can?(:create, :email_domain_block) ? 3 : 2 }= t('admin.accounts.email')
   %td{ rowspan: can?(:create, :email_domain_block) ? 3 : 2 }= account.user_email
   %td= table_link_to 'edit', t('admin.accounts.change_email.label'), admin_account_change_email_path(account.id) if can?(:change_email, account.user)

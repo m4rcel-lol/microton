@@ -94,6 +94,7 @@ export const accountDefaultValues: AccountShape = {
   uri: '',
   url: '',
   username: '',
+  verified_badge: false,
   followers_count: 0,
   following_count: 0,
   statuses_count: 0,

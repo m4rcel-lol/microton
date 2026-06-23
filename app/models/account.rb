@@ -37,6 +37,7 @@
 #  indexable                     :boolean          default(FALSE), not null
 #  last_webfingered_at           :datetime
 #  locked                        :boolean          default(FALSE), not null
+#  manual_verified_badge         :boolean          default(FALSE), not null
 #  memorial                      :boolean          default(FALSE), not null
 #  note                          :text             default(""), not null
 #  outbox_url                    :string           default(""), not null
@@ -78,6 +79,8 @@ class Account < ApplicationRecord
   USERNAME_LENGTH_LIMIT = 30
   DISPLAY_NAME_LENGTH_LIMIT = 40
   NOTE_LENGTH_LIMIT = 500
+  VERIFIED_BADGE_FOLLOWERS_THRESHOLD = 10_000
+  VERIFIED_BADGE_POST_VIEWS_THRESHOLD = 1_000_000
 
   # Hard limits for federated content
   USERNAME_LENGTH_HARD_LIMIT = 2048
@@ -218,6 +221,15 @@ class Account < ApplicationRecord
   end
 
   alias bot bot?
+
+  def verified_badge?
+    !unavailable? && (
+      manual_verified_badge? ||
+      verified_badge_from_role? ||
+      verified_badge_from_followers? ||
+      verified_badge_from_status_views?
+    )
+  end
 
   def bot=(val)
     self.actor_type = ActiveModel::Type::Boolean.new.cast(val) ? 'Service' : 'Person'
@@ -489,6 +501,20 @@ class Account < ApplicationRecord
   end
 
   private
+
+  def verified_badge_from_role?
+    user_role&.administrator? || false
+  end
+
+  def verified_badge_from_followers?
+    followers_count >= VERIFIED_BADGE_FOLLOWERS_THRESHOLD
+  end
+
+  def verified_badge_from_status_views?
+    return false unless StatusStat.column_names.include?('views_count')
+
+    statuses.without_reblogs.joins(:status_stat).where('status_stats.views_count >= ?', VERIFIED_BADGE_POST_VIEWS_THRESHOLD).exists?
+  end
 
   def prepare_contents
     display_name&.strip!

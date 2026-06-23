@@ -133,6 +133,48 @@ RSpec.describe Account do
     end
   end
 
+  describe '#verified_badge?' do
+    subject { account.verified_badge? }
+
+    let(:account) { Fabricate(:account) }
+
+    context 'with no matching badge source' do
+      it { is_expected.to be false }
+    end
+
+    context 'with a manually assigned badge' do
+      before do
+        account.update!(manual_verified_badge: true)
+      end
+
+      it { is_expected.to be true }
+    end
+
+    context 'with an administrator role' do
+      let(:role) { Fabricate(:user_role, permissions: UserRole::FLAGS[:administrator]) }
+      let(:account) { Fabricate(:user, role: role).account }
+
+      it { is_expected.to be true }
+    end
+
+    context 'with enough followers' do
+      before do
+        account.account_stat.update!(followers_count: described_class::VERIFIED_BADGE_FOLLOWERS_THRESHOLD)
+      end
+
+      it { is_expected.to be true }
+    end
+
+    context 'when the account is suspended' do
+      before do
+        account.update!(manual_verified_badge: true)
+        account.suspend!
+      end
+
+      it { is_expected.to be false }
+    end
+  end
+
   describe '#save_with_optional_media!' do
     before do
       stub_request(:get, 'https://remote.test/valid_avatar').to_return(request_fixture('avatar.txt'))

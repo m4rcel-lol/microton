@@ -155,6 +155,8 @@ namespace :admin do
       post :remove_avatar
       post :remove_header
       post :memorialize
+      post :verify_badge
+      post :unverify_badge
       post :approve
       post :reject
       post :unblock_email

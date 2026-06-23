@@ -65,6 +65,7 @@ export interface BaseApiAccountJSON {
   uri: string;
   url?: string;
   username: string;
+  verified_badge: boolean;
   moved?: ApiAccountJSON;
   suspended?: boolean;
   limited?: boolean;

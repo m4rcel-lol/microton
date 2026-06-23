@@ -75,6 +75,22 @@ RSpec.describe REST::AccountSerializer do
     end
   end
 
+  context 'when the account has a verified badge' do
+    before do
+      account.update!(manual_verified_badge: true)
+    end
+
+    it 'serializes the verified badge flag' do
+      expect(subject['verified_badge']).to be true
+    end
+  end
+
+  context 'when the account does not have a verified badge' do
+    it 'serializes the verified badge flag as false' do
+      expect(subject['verified_badge']).to be false
+    end
+  end
+
   describe '#feature_approval' do
     context 'when account is local' do
       context 'when account is discoverable' do

@@ -26,7 +26,7 @@ const messages = defineMessages({
   message: {
     id: 'confirmations.hide_featured_tab.message',
     defaultMessage:
-      'This will hide the tab for users on {serverName} and other servers running the latest version of Mastodon. Other displays may vary.',
+      'This will hide the tab for users on {serverName} and other servers running the latest version of Microton. Other displays may vary.',
   },
   confirm: {
     id: 'confirmations.hide_featured_tab.confirm',

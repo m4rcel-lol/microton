@@ -138,6 +138,52 @@ RSpec.describe Admin::AccountsController do
     end
   end
 
+  describe 'POST #verify_badge' do
+    subject { post :verify_badge, params: { id: account.id } }
+
+    let(:current_user) { Fabricate(:user, role: role) }
+    let(:role) { UserRole.find_by(name: 'Admin') }
+    let(:account) { Fabricate(:account, manual_verified_badge: false) }
+
+    it 'adds a manual verified badge and logs the action' do
+      expect { subject }
+        .to change { account.reload.manual_verified_badge? }
+        .from(false)
+        .to(true)
+
+      expect(response).to redirect_to admin_account_path(account.id)
+      expect(latest_admin_action_log)
+        .to have_attributes(
+          action: eq(:verify_badge),
+          account_id: eq(current_user.account_id),
+          target_id: eq(account.id)
+        )
+    end
+  end
+
+  describe 'POST #unverify_badge' do
+    subject { post :unverify_badge, params: { id: account.id } }
+
+    let(:current_user) { Fabricate(:user, role: role) }
+    let(:role) { UserRole.find_by(name: 'Admin') }
+    let(:account) { Fabricate(:account, manual_verified_badge: true) }
+
+    it 'removes a manual verified badge and logs the action' do
+      expect { subject }
+        .to change { account.reload.manual_verified_badge? }
+        .from(true)
+        .to(false)
+
+      expect(response).to redirect_to admin_account_path(account.id)
+      expect(latest_admin_action_log)
+        .to have_attributes(
+          action: eq(:unverify_badge),
+          account_id: eq(current_user.account_id),
+          target_id: eq(account.id)
+        )
+    end
+  end
+
   describe 'POST #approve' do
     subject { post :approve, params: { id: account.id } }
 

@@ -41,11 +41,12 @@ class ServerBanner extends PureComponent {
   render () {
     const { server, intl } = this.props;
     const isLoading = server.isLoading;
+    const contactAccountId = server.item?.contact?.account?.id;
 
     return (
       <div className='server-banner'>
         <div className='server-banner__introduction'>
-          <FormattedMessage id='server_banner.is_one_of_many' defaultMessage='{domain} runs Microton, a Mastodon-based server you can use to participate in the fediverse.' values={{ domain: <strong>{domain}</strong>, mastodon: <a href='https://joinmastodon.org' target='_blank' rel='noopener'>Mastodon</a> }} />
+          <FormattedMessage id='server_banner.is_one_of_many' defaultMessage='{domain} runs Microton, a Mastodon-based server you can use to participate in the fediverse.' values={{ domain: <strong>{domain}</strong> }} />
         </div>
 
         <NavLink to='/about'>
@@ -73,7 +74,7 @@ class ServerBanner extends PureComponent {
           <div className='server-banner__meta__column'>
             <h4><FormattedMessage id='server_banner.administered_by' defaultMessage='Administered by:' /></h4>
 
-            <Account id={server.item?.contact.account?.id} size={36} minimal />
+            {isLoading ? <Skeleton width='10ch' /> : contactAccountId && <Account id={contactAccountId} size={36} minimal />}
           </div>
 
           <div className='server-banner__meta__column'>

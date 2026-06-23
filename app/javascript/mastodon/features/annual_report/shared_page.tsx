@@ -20,7 +20,7 @@ export const WrapstodonSharedPage: FC = () => {
           <IconLogo className={classes.logo} />
           <FormattedMessage
             id='annual_report.shared_page.footer'
-            defaultMessage='Generated with {heart} by the Mastodon team'
+            defaultMessage='Generated with {heart} by the Microton team'
             values={{ heart: '🐘' }}
             tagName='p'
           />
@@ -29,7 +29,7 @@ export const WrapstodonSharedPage: FC = () => {
               <a href='https://joinmastodon.org'>
                 <FormattedMessage
                   id='footer.about_mastodon'
-                  defaultMessage='About Mastodon'
+                  defaultMessage='About Microton'
                 />
               </a>
             </li>
@@ -47,7 +47,7 @@ export const WrapstodonSharedPage: FC = () => {
         <div className={classes.footerSection}>
           <FormattedMessage
             id='annual_report.shared_page.footer_server_info'
-            defaultMessage='{username} uses {domain}, one of many communities powered by Mastodon.'
+            defaultMessage='{username} uses {domain}, one of many communities powered by Microton.'
             values={{
               username: <DisplayName variant='simple' account={account} />,
               domain: <strong>{domain}</strong>,
