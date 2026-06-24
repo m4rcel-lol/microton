@@ -36,6 +36,10 @@ const messages = defineMessages({
     id: 'follow_suggestions.hints.friends_of_friends',
     defaultMessage: 'This profile is popular among the people you follow.',
   },
+  followedTagsHint: {
+    id: 'follow_suggestions.hints.followed_tags',
+    defaultMessage: 'This profile has been active in hashtags you follow.',
+  },
   similarToRecentlyFollowedHint: {
     id: 'follow_suggestions.hints.similar_to_recently_followed',
     defaultMessage:
@@ -64,6 +68,15 @@ const Source: React.FC<{ id: ApiSuggestionSourceJSON }> = ({ id }) => {
   switch (id) {
     case 'friends_of_friends':
       hint = intl.formatMessage(messages.friendsOfFriendsHint);
+      label = (
+        <FormattedMessage
+          id='follow_suggestions.personalized_suggestion'
+          defaultMessage='Personalized suggestion'
+        />
+      );
+      break;
+    case 'followed_tags':
+      hint = intl.formatMessage(messages.followedTagsHint);
       label = (
         <FormattedMessage
           id='follow_suggestions.personalized_suggestion'
@@ -226,7 +239,7 @@ export const InlineFollowSuggestions: React.FC<{ hidden?: boolean }> = ({
               defaultMessage="Don't show again"
             />
           </button>
-          <Link to='/explore/suggestions' className='link-button'>
+          <Link to='/suggestions' className='link-button'>
             <FormattedMessage
               id='follow_suggestions.view_all'
               defaultMessage='View all'

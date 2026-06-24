@@ -38,6 +38,11 @@ RSpec.describe Trends::Statuses do
         expect(query.filtered_for(account).to_a).to eq [status_foo]
       end
 
+      it 'filters out followed accounts' do
+        account.follow!(status_foo.account)
+        expect(query.filtered_for(account).to_a).to eq [status_bar]
+      end
+
       it 'filters out blocked-by accounts' do
         status_foo.account.block!(account)
         expect(query.filtered_for(account).to_a).to eq [status_bar]
@@ -106,6 +111,32 @@ RSpec.describe Trends::Statuses do
     end
   end
 
+  describe '#cached_allowed_status_ids' do
+    let!(:higher_score_status) { Fabricate(:status, trendable: true, language: 'en') }
+    let!(:lower_score_status) { Fabricate(:status, trendable: true, language: 'en') }
+    let!(:higher_score) do
+      Fabricate(:status_trend, status: higher_score_status, account: higher_score_status.account, score: 10, language: 'en', allowed: true)
+    end
+    let!(:lower_score) do
+      Fabricate(:status_trend, status: lower_score_status, account: lower_score_status.account, score: 1, language: 'en', allowed: true)
+    end
+
+    it 'stores ordered allowed status IDs in Redis' do
+      expect(subject.cached_allowed_status_ids('en')).to eq [higher_score_status.id, lower_score_status.id]
+      expect(redis.ttl(subject.send(:allowed_status_ids_cache_key, 'en')))
+        .to be_between(1, described_class::CACHE_TTL.to_i).inclusive
+    end
+
+    it 'returns cached IDs until the cache expires' do
+      expect(subject.cached_allowed_status_ids('en')).to eq [higher_score_status.id, lower_score_status.id]
+
+      higher_score.update!(score: 0)
+      lower_score.update!(score: 20)
+
+      expect(subject.cached_allowed_status_ids('en')).to eq [higher_score_status.id, lower_score_status.id]
+    end
+  end
+
   describe '#refresh' do
     let!(:today) { at_time }
     let!(:yesterday) { today - 1.day }
@@ -144,6 +175,26 @@ RSpec.describe Trends::Statuses do
       subject.refresh(today + subject.options[:score_halflife])
       decayed_score = status_bar.trend.reload.score
       expect(decayed_score).to be <= original_score / 2
+    end
+
+    it 'counts replies as engagement' do
+      status = Fabricate(:status, text: 'Reply-heavy', language: 'en', trendable: true, created_at: today)
+      status.status_stat.update!(replies_count: default_threshold_value)
+      subject.add(status, status.account_id, today)
+
+      subject.refresh(today)
+
+      expect(subject.query.limit(10).to_a).to include(status)
+    end
+
+    it 'removes posts older than 24 hours from trends' do
+      old_status = Fabricate(:status, text: 'Old news', language: 'en', trendable: true, created_at: today - 25.hours)
+      old_status.status_stat.update!(reblogs_count: default_threshold_value * 10)
+      subject.add(old_status, old_status.account_id, today)
+
+      subject.refresh(today)
+
+      expect(subject.query.limit(10).to_a).to_not include(old_status)
     end
   end
 

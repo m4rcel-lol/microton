@@ -5,7 +5,8 @@ export type ApiSuggestionSourceJSON =
   | 'most_followed'
   | 'most_interactions'
   | 'similar_to_recently_followed'
-  | 'friends_of_friends';
+  | 'friends_of_friends'
+  | 'followed_tags';
 
 export interface ApiSuggestionJSON {
   sources: [ApiSuggestionSourceJSON, ...ApiSuggestionSourceJSON[]];

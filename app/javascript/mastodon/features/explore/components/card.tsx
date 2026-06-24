@@ -25,7 +25,8 @@ type SuggestionSource =
   | 'similar_to_recently_followed'
   | 'featured'
   | 'most_followed'
-  | 'most_interactions';
+  | 'most_interactions'
+  | 'followed_tags';
 
 export const Card: React.FC<{ id: string; source: SuggestionSource }> = ({
   id,
@@ -47,6 +48,14 @@ export const Card: React.FC<{ id: string; source: SuggestionSource }> = ({
         <FormattedMessage
           id='follow_suggestions.friends_of_friends_longer'
           defaultMessage='Popular among people you follow'
+        />
+      );
+      break;
+    case 'followed_tags':
+      label = (
+        <FormattedMessage
+          id='follow_suggestions.followed_tags_longer'
+          defaultMessage='Active in hashtags you follow'
         />
       );
       break;

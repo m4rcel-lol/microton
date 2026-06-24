@@ -20,7 +20,15 @@ class TagFollow < ApplicationRecord
 
   accepts_nested_attributes_for :tag
 
+  after_commit :invalidate_follow_recommendations_cache
+
   rate_limit by: :account, family: :follows
 
   scope :for_local_distribution, -> { joins(account: :user).merge(User.signed_in_recently) }
+
+  private
+
+  def invalidate_follow_recommendations_cache
+    Rails.cache.delete("follow_recommendations/#{account_id}")
+  end
 end

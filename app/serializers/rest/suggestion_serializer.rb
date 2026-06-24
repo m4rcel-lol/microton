@@ -12,6 +12,7 @@ class REST::SuggestionSerializer < ActiveModel::Serializer
     # NOTE: Those are not completely accurate, but those are personalized interactions
     similar_to_recently_followed: 'past_interactions',
     friends_of_friends: 'past_interactions',
+    followed_tags: 'past_interactions',
   }.freeze
 
   def source

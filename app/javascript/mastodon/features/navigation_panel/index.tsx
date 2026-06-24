@@ -54,6 +54,7 @@ import { AnnualReportNavItem } from '../annual_report/nav_item';
 
 import { DisabledAccountBanner } from './components/disabled_account_banner';
 import { FollowedTagsPanel } from './components/followed_tags_panel';
+import { FollowSuggestions } from './components/follow_suggestions';
 import { ListPanel } from './components/list_panel';
 import { MoreLink } from './components/more_link';
 import { SignInBanner } from './components/sign_in_banner';
@@ -418,6 +419,8 @@ export const NavigationPanel: React.FC<{ multiColumn?: boolean }> = ({
       </ul>
 
       <div className='flex-spacer' />
+
+      {signedIn && <FollowSuggestions />}
 
       <Trends />
     </nav>

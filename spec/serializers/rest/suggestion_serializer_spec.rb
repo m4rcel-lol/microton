@@ -18,4 +18,17 @@ RSpec.describe REST::SuggestionSerializer do
       expect(serialization['account']['id']).to eq(account.id.to_s)
     end
   end
+
+  context 'with a followed tags source' do
+    let(:record) do
+      AccountSuggestions::Suggestion.new(
+        account: account,
+        sources: [:followed_tags]
+      )
+    end
+
+    it 'maps to the legacy personalized source' do
+      expect(serialization['source']).to eq('past_interactions')
+    end
+  end
 end

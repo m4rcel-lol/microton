@@ -6,6 +6,7 @@ class AccountSuggestions
   SOURCES = [
     AccountSuggestions::SettingSource,
     AccountSuggestions::FriendsOfFriendsSource,
+    AccountSuggestions::FollowedTagsSource,
     AccountSuggestions::SimilarProfilesSource,
     AccountSuggestions::GlobalSource,
     AccountSuggestions::FaspSource,

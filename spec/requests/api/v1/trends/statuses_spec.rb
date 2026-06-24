@@ -75,6 +75,28 @@ RSpec.describe 'API V1 Trends Statuses' do
           expect(response.parsed_body[0]['content']).to eq('I make real friends online')
         end
       end
+
+      context 'when the request is authenticated' do
+        include_context 'with API authentication', oauth_scopes: 'read:statuses'
+
+        let(:followed_status) { Fabricate(:status, text: 'Already in the home feed', trendable: true, language: 'en') }
+        let(:discovery_status) { Fabricate(:status, text: 'Worth discovering', trendable: true, language: 'en') }
+
+        before do
+          Fabricate(:status_trend, status: followed_status, account: followed_status.account, score: 20, language: 'en', allowed: true)
+          Fabricate(:status_trend, status: discovery_status, account: discovery_status.account, score: 10, language: 'en', allowed: true)
+          user.account.follow!(followed_status.account)
+        end
+
+        it 'excludes posts from followed accounts' do
+          get '/api/v1/trends/statuses', headers: headers
+
+          expect(response).to have_http_status(200)
+          expect(response.parsed_body.pluck('id'))
+            .to include(discovery_status.id.to_s)
+            .and not_include(followed_status.id.to_s)
+        end
+      end
     end
   end
 end

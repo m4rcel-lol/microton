@@ -70,7 +70,7 @@ const Explore: React.FC<{ multiColumn: boolean }> = ({ multiColumn }) => {
         </NavLink>
 
         {signedIn && (
-          <NavLink exact to='/explore/suggestions'>
+          <NavLink exact to='/suggestions'>
             <FormattedMessage
               tagName='div'
               id='explore.suggested_follows'
@@ -91,7 +91,7 @@ const Explore: React.FC<{ multiColumn: boolean }> = ({ multiColumn }) => {
       <Switch>
         <Route path='/explore/tags' component={Tags} />
         <Route path='/explore/links' component={Links} />
-        <Route path='/explore/suggestions' component={Suggestions} />
+        <Route path={['/suggestions', '/explore/suggestions']} component={Suggestions} />
         <Route exact path={['/explore', '/explore/posts']}>
           <Statuses multiColumn={multiColumn} />
         </Route>
